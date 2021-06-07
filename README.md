@@ -40,5 +40,10 @@ python p3b_gurobi_k20.py
 ```
 ###### P2bc Use Greedy for big dataset(K=20) and evalutation
 ```
-p3bc_greedy_k20.py
+python p3bc_greedy_k20.py
+```
+
+##### Problem 4: Uncapacitated Facility Location Problem
+```
+python python p4_UFLP.py
 ```
