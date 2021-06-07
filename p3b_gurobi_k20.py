@@ -51,18 +51,9 @@ def getKMedian(K):
 
 import pdb
 
-#K=5
-# k5,s5 = getKMedian(5)
 
-#K=10
+#K=20
 k20,s20 = getKMedian(20)
-
-# k5.optimize()
-# print("**********K-median,K==5,data2**********")
-# for facility in s5.keys():
-#     if (abs(s5[facility].x) > 1e-6):
-#         print(f"Build a gas station at location {facility}.")
-
 
 print("**********K-median,K==20,data1**********")
 k20.optimize()
