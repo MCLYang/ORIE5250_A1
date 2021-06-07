@@ -15,5 +15,30 @@ def Haversine(point1,point2):
   d = 2*r*np.arcsin(np.sqrt(np.sin((theta2-theta1)/2)**2+np.cos(theta1)*np.cos(theta2)*np.sin((lambda2-lambda1)/2)**2))
   return d
 ```
+##### Problem 2: K-Center
+###### P2a: Use Gurobi for small dataset(K=5 amd k=10)
+```
+python p2a_gurobi_k5_k10.py
+```
+###### P2b Use Gurobi for big dataset(K=20)
+```
+python p2b_gurobi_k20.py
+```
+###### P2bc Use Greedy for big dataset(K=20) and evalutation
+```
+p2bc_greedy_k20.py
+```
 
-
+##### Problem 3: K-Medium
+###### P2a: Use Gurobi for small dataset(K=5 amd k=10)
+```
+python p3a_gurobi_k5_k10.py
+```
+###### P2b Use Gurobi for big dataset(K=20)
+```
+python p3b_gurobi_k20.py
+```
+###### P2bc Use Greedy for big dataset(K=20) and evalutation
+```
+p3bc_greedy_k20.py
+```
