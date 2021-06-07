@@ -47,3 +47,7 @@ python p3bc_greedy_k20.py
 ```
 python python p4_UFLP.py
 ```
+##### Problem 5: Minimum Weighted Matching
+```
+python python p5_MWM.py
+```
