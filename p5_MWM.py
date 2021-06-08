@@ -34,7 +34,7 @@ def getRiderLocations():
   #Part A-1
   for index, point in riders.iterrows():
     id = point['Taxi ID']
-    loc = tuple((point['Latitude'],point['Longitude']))
+    loc = tuple((point['Longitude'],point['Latitude']))
     occ = point['Occupied']
     dt = point['Datetime']
     if id in current_occ and current_occ[id] == 0 and occ == 1 and id not in ids:
@@ -45,13 +45,14 @@ def getRiderLocations():
       prev_dt_2 = pd.to_datetime(dt) - pd.Timedelta(minutes=5, seconds=30)
       taxi = taxis[(taxis['Taxi ID']==id) & (taxis['Datetime'] < str(prev_dt_1)) & (taxis['Datetime'] > str(prev_dt_2))].tail(1)
       if not taxi['Occupied'].all():
-        largeTaxis.append(tuple((taxi['Latitude'],taxi['Longitude'])))
+        largeTaxis.append(tuple((taxi['Longitude'],taxi['Latitude'])))
       else:
         t = data3[(data3['Taxi ID']==id) & (data3['Datetime'] > str(taxi['Datetime']))]
         t.sort_values(by=['Datetime'])
         for index, tax in t.iterrows():
           if tax['Occupied'] == 0:
-            largeTaxis.append(tuple((tax['Latitude'],tax['Longitude'])))
+            largeTaxis.append(tuple((tax['Longitude'],tax['Latitude'])))
+            break
             
     current_occ[id] = occ
   return locations, largeTaxis
