@@ -27,7 +27,7 @@ taxis.sort_values(by=['Datetime'])
 
 def getRiderLocations():
   locations = []
-  taxis = []
+  largeTaxis = []
   current_occ = {}
   ids = set()
   print("=======Part A=======")
@@ -45,16 +45,16 @@ def getRiderLocations():
       prev_dt_2 = pd.to_datetime(dt) - pd.Timedelta(minutes=5, seconds=30)
       taxi = taxis[(taxis['Taxi ID']==id) & (taxis['Datetime'] < str(prev_dt_1)) & (taxis['Datetime'] > str(prev_dt_2))].tail(1)
       if not taxi['Occupied'].all():
-        taxis.append(tuple((taxi['Latitude'],taxi['Longitude'])))
+        largeTaxis.append(tuple((taxi['Latitude'],taxi['Longitude'])))
       else:
         t = data3[(data3['Taxi ID']==id) & (data3['Datetime'] > str(taxi['Datetime']))]
         t.sort_values(by=['Datetime'])
         for index, tax in t.iterrows():
           if tax['Occupied'] == 0:
-            taxis.append(tuple((tax['Latitude'],tax['Longitude'])))
+            largeTaxis.append(tuple((tax['Latitude'],tax['Longitude'])))
             
     current_occ[id] = occ
-  return locations, taxis
+  return locations, largeTaxis
 
 def getMatching():
 
