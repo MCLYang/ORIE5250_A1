@@ -58,27 +58,27 @@ def getRiderLocations():
 
 def getMatching():
 
-  gasLocations,taxiLocations = getRiderLocations()
+  riderLocations,taxiLocations = getRiderLocations()
 
   taxLocs = []
   for tax in taxiLocations:
     taxLocs.append(str(tax[0])+"#"+str(tax[1]))
 
-  gasLocs = []
-  for gas in gasLocations:
-    gasLocs.append(str(gas[0])+"#"+str(gas[1]))
+  riderLocs = []
+  for rider in riderLocations:
+    riderLocs.append(str(rider[0])+"#"+str(rider[1]))
   
   print("=======Part B========")
 
   #Part B
   B = nx.Graph()
   B.add_nodes_from(taxLocs, bipartite=0)
-  B.add_nodes_from(gasLocs, bipartite=1)
+  B.add_nodes_from(riderLocs, bipartite=1)
       
   for tax in taxiLocations:
-    for gas in gasLocations:
-      d = Haversine(tax,gas)
-      B.add_edge(str(tax[0])+"#"+str(tax[1]), str(gas[0])+"#"+str(gas[1]), weight = d)
+    for rider in riderLocations:
+      d = Haversine(tax,rider)
+      B.add_edge(str(tax[0])+"#"+str(tax[1]), str(rider[0])+"#"+str(rider[1]), weight = d)
 
   print("=======Part C=======")
 
