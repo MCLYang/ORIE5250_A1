@@ -70,7 +70,7 @@ def get_data(data):
 # m.addConstrs((gp.quicksum(assign[(i,j)] for i in range(num_taxi)) == 1 for j in range(num_taxi)), name='Demand')
 # m.addConstr((gp.quicksum(select[i] for i in range(num_taxi)))<=K, name='k_kits')
 # m.update()
-# m.optimize()
+# m.optimize()      d = Haversine(tax,gas)
 
 # print("[K-center],K = 10, data2")
 # for facility in select.keys():
