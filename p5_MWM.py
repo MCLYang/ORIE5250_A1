@@ -1,8 +1,9 @@
+from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
-import gurobipy as gp
-from gurobipy import GRB
-from itertools import product
+
+from networkx.algorithms import bipartite
+import networkx as nx
 
 def Haversine(point1,point2):
   #point is formatted as (lamba,theta)
@@ -12,62 +13,74 @@ def Haversine(point1,point2):
   d = 2*r*np.arcsin(np.sqrt(np.sin((theta2-theta1)/2)**2+np.cos(theta1)*np.cos(theta2)*np.sin((lambda2-lambda1)/2)**2))
   return d
 
-  
-df = pd.read_csv("data2.txt",names=["Taxi ID","Datetime","Longitude","Latitude","Speed","Direction","Occupied","Other"])
-Longitude = np.array(df["Longitude"],dtype=float)
-Latitude = np.array(df["Latitude"],dtype=float)
-num_taxi = len(Latitude)
-# Construct the N*N adjcent matrix to store the pair-wise distance.
-# I use the dictionary to store the the matrix
-# key is the (i,j) then value is the corresponding distance
-distance_dict = {}
-for i in range(num_taxi):
-  for j in range(num_taxi):
-    idx = (i,j)
-    point1 = [Longitude[i],Latitude[i]]
-    point2 = [Longitude[j],Latitude[j]]
-    d = Haversine(point1,point2)
-    distance_dict[idx] = d
+data3 = pd.read_csv("data3.txt",names=["Taxi ID","Datetime","Longitude","Latitude","Speed","Direction","Occupied","Other"])
+data3.set_index("Taxi ID")
+data3.sort_values(by=['Datetime'])
 
-temp = np.array([Longitude,Latitude])
-V = {}
-for i in range(temp.shape[1]):
-  V[i] = temp[:,i]
+taxis = data3[(data3['Datetime'] > '2009-09-01 08:00:00') & (data3['Datetime'] < '2009-09-01 08:05:00')]
+taxis.set_index("Taxi ID")
+taxis.sort_values(by=['Datetime'])
 
+prev_taxis = data3[(data3['Datetime'] > '2009-09-01 07:55:00') & (data3['Datetime'] < '2009-09-01 08:00:00')]
+prev_taxis.set_index("Taxi ID")
+prev_taxis.sort_values(by=['Datetime'])
 
+def getGasLocations():
+  locations = []
+  current_occ = {}
+  ids = set()
+  #Part A-1
+  for index, point in taxis.iterrows():
+    id = point['Taxi ID']
+    loc = tuple((point['Latitude'],point['Longitude']))
+    occ = point['Occupied']
+    dt = point['Datetime']
+    if id in current_occ and current_occ[id] == 0 and occ == 1 and id not in ids:
+      locations.append(loc)
+      ids.add(id)
+      #Part A-2
+      prev_dt_1 = pd.to_datetime(dt) - pd.Timedelta(minutes=4, seconds=30)
+      prev_dt_2 = pd.to_datetime(dt) - pd.Timedelta(minutes=5, seconds=30)
+      prev = prev_taxis[(prev_taxis['Taxi ID']==id) & (prev_taxis['Datetime'] < str(prev_dt_1)) & (prev_taxis['Datetime'] > str(prev_dt_2))].tail(1)
+      if not prev['Occupied'].all():
+        locations.append(tuple((prev['Latitude'],prev['Longitude'])))
+      else:
+        t = data3[(data3['Taxi ID']==id) & (data3['Datetime'] > str(prev['Datetime']))]
+        t.sort_values(by=['Datetime'])
+        for index, tax in t.iterrows():
+          if tax['Occupied'] == 0:
+            locations.append(tuple((tax['Latitude'],tax['Longitude'])))
+            
+    current_occ[id] = occ
+  return locations
 
-import math 
+def getMatching():
 
-def getLocation():
-  cartesian_prod = list(product(range(num_taxi), range(num_taxi)))
-  m3 = gp.Model('facility-location')
-  select = m3.addVars(num_taxi, vtype=GRB.BINARY, name='Select')
-  assign = m3.addVars(cartesian_prod, vtype=GRB.BINARY, name='Assign')
-  m3.update()
+  gasLocations = getGasLocations()
 
-  n = math.sqrt(num_taxi)
-  dists = distance_dict.values()
-  avg_d = sum(dists)/len(dists)
-  op_cost = n*avg_d
+  taxiLocations = []
+  taxiDist = []
+  for index, point in data3.iterrows():
+    taxiDist.append((point['Latitude'],point['Longitude']))
+    taxiLocations.append(str(point['Latitude'])+"#"+str(point['Longitude']))
 
-  m3.setObjective(gp.quicksum(select[i]*op_cost for i in range(num_taxi)) + gp.quicksum(assign[(i,j)]*distance_dict[(i,j)] for i in range(num_taxi) for j in range(num_taxi)), GRB.MINIMIZE)
-  m3.update()
+  gasLocs = []
+  for gas in gasLocations:
+    gasLocs.append(str(gas[0])+"#"+str(gas[1]))
 
-  m3.addConstrs((assign[(i,j)] <= select[i] for i,j in cartesian_prod), name='Setup2ship')
-  m3.addConstrs((gp.quicksum(assign[(i,j)] for i in range(num_taxi)) == 1 for j in range(num_taxi)), name='Demand')
-  m3.update()
-  return m3,select
+  #Part B
+  B = nx.Graph()
+  B.add_nodes_from(taxiLocations, bipartite=0)
+  B.add_nodes_from(gasLocs, bipartite=1)
+      
+  for tax in taxiDist:
+    for gas in gasLocations:
+      d = Haversine(tax,gas)
+      B.add_edge(str(tax[0])+"#"+str(tax[1]), str(gas[0])+"#"+str(gas[1]), weight = d)
 
+  #Part C
+  matching = bipartite.matching.minimum_weight_full_matching(B)
 
-location,select = getLocation()
-location.optimize()
+  return matching
 
-print("[Uncapacitated Facility Location Problem], data2")
-for facility in select.keys():
-    if (abs(select[facility].x) > 1e-6):
-        print(f" Build a emergency supply kits at location {facility}.")
-
-# end = time.time()
-
-# print(f"Runtime of the program is {end - start}")
-
+print(getMatching())
