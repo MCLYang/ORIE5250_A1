@@ -29,6 +29,7 @@ def getGasLocations():
   locations = []
   current_occ = {}
   ids = set()
+  print("=======Part A=======")
   #Part A-1
   for index, point in taxis.iterrows():
     id = point['Taxi ID']
@@ -67,6 +68,8 @@ def getMatching():
   gasLocs = []
   for gas in gasLocations:
     gasLocs.append(str(gas[0])+"#"+str(gas[1]))
+  
+  print("=======Part B========")
 
   #Part B
   B = nx.Graph()
@@ -78,8 +81,10 @@ def getMatching():
       d = Haversine(tax,gas)
       B.add_edge(str(tax[0])+"#"+str(tax[1]), str(gas[0])+"#"+str(gas[1]), weight = d)
 
+  print("=======Part C=======")
+
   #Part C
-  matching = bipartite.matching.minimum_weight_full_matching(B)
+  matching = bipartite.matching.minimum_weight_full_matching(B,top_nodes=taxiLocations)
 
   return matching
 
